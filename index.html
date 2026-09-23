@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#08110d">
+  <title>Expediente 26</title>
+  <style>
+    :root { color-scheme: dark; --green:#80ffb0; --dim:#84a995; --panel:#0d1a14e8; --danger:#ff7181; }
+    * { box-sizing:border-box; }
+    body { margin:0; min-height:100svh; display:grid; place-items:center; overflow-x:hidden; background:#050907; color:#e8fff0; font:16px/1.55 ui-monospace,SFMono-Regular,Consolas,monospace; }
+    body::before { content:""; position:fixed; inset:0; pointer-events:none; opacity:.14; background:repeating-linear-gradient(0deg,transparent 0 3px,#8cffb520 4px); }
+    .stars { position:fixed; inset:0; pointer-events:none; background-image:radial-gradient(#80ffb0 1px,transparent 1px); background-size:43px 43px; opacity:.08; animation:drift 18s linear infinite; }
+    main { width:min(92vw,680px); margin:32px auto; }
+    .status { display:flex; justify-content:space-between; gap:16px; margin:0 4px 10px; color:var(--dim); font-size:.76rem; letter-spacing:.08em; text-transform:uppercase; }
+    .card { position:relative; padding:clamp(22px,6vw,46px); border:1px solid #4fff9166; border-radius:14px; background:var(--panel); box-shadow:0 0 45px #1eff7130,inset 0 0 30px #1eff7108; }
+    .card::after { content:""; position:absolute; inset:8px; border:1px solid #80ffb012; border-radius:9px; pointer-events:none; }
+    .tag { color:var(--green); font-size:.78rem; letter-spacing:.18em; text-transform:uppercase; }
+    h1 { margin:.35rem 0 1rem; font-size:clamp(2rem,8vw,3.7rem); line-height:1; letter-spacing:-.06em; text-transform:uppercase; text-shadow:0 0 18px #47ff8c80; }
+    h2 { margin:.4rem 0 1rem; font-size:clamp(1.45rem,6vw,2.3rem); line-height:1.1; }
+    p { margin:.8rem 0; }
+    .brief { color:#c8e6d2; }
+    .clue { margin:22px 0; padding:18px; border-left:3px solid var(--green); background:#7affaa0a; color:#dfffea; }
+    .icons { display:flex; justify-content:center; gap:clamp(10px,4vw,24px); margin:24px 0; font-size:clamp(1.8rem,9vw,3.4rem); filter:grayscale(.2); }
+    .address { display:grid; gap:10px; margin:24px 0; text-align:center; }
+    .address span { padding:10px; border:1px dashed #80ffb055; border-radius:8px; color:var(--green); font-size:clamp(1.05rem,5vw,1.4rem); }
+    form { display:grid; gap:10px; margin-top:24px; }
+    label { color:var(--dim); font-size:.78rem; letter-spacing:.1em; text-transform:uppercase; }
+    .answer { display:flex; gap:8px; }
+    input { min-width:0; flex:1; padding:14px; border:1px solid #80ffb055; border-radius:8px; outline:none; background:#030705; color:#fff; font:inherit; text-transform:uppercase; }
+    input:focus { border-color:var(--green); box-shadow:0 0 0 3px #80ffb018; }
+    button { padding:13px 16px; border:1px solid var(--green); border-radius:8px; background:#163d28; color:#dffff0; font:700 .85rem/1 inherit; letter-spacing:.06em; cursor:pointer; }
+    button:hover { background:#205839; }
+    .feedback { min-height:1.55em; margin:.15rem 0 0; color:var(--danger); font-size:.88rem; }
+    .saved { margin-top:18px; color:var(--dim); font-size:.76rem; }
+    .lock { text-align:center; }
+    .countdown { margin:24px 0 8px; color:var(--green); font-size:clamp(1.5rem,7vw,2.6rem); font-weight:800; text-shadow:0 0 16px #47ff8c70; }
+    .progress { height:5px; margin-top:14px; overflow:hidden; border-radius:99px; background:#193023; }
+    .progress > span { display:block; height:100%; background:var(--green); box-shadow:0 0 10px var(--green); transition:width .5s ease; }
+    .final { text-align:center; }
+    .plane { display:block; margin:22px auto; font-size:4.5rem; animation:fly 2.2s ease-in-out infinite; }
+    .manifest { margin:22px 0; padding:16px; border:1px solid #80ffb044; border-radius:8px; text-align:left; }
+    .reset { display:block; margin:18px auto 0; padding:4px; border:0; background:none; color:#557366; font-size:.7rem; font-weight:400; }
+    .flash { animation:flash .5s ease; }
+    @keyframes fly { 50% { transform:translate(12px,-8px) rotate(-4deg); } }
+    @keyframes drift { to { background-position:43px 43px; } }
+    @keyframes flash { 50% { box-shadow:0 0 80px #5aff9d75; } }
+    @media (max-width:520px) { .answer { flex-direction:column; } button { min-height:48px; } }
+    @media (prefers-reduced-motion:reduce) { *,*::before,*::after { animation:none!important; scroll-behavior:auto!important; } }
+  </style>
+</head>
+<body>
+  <div class="stars"></div>
+  <main>
+    <div class="status"><span>Expediente 26</span><span id="status">Conexión segura</span></div>
+    <section class="card" id="game" aria-live="polite"></section>
+    <div class="progress" aria-label="Progreso"><span id="progress"></span></div>
+    <button class="reset" id="reset" type="button">reiniciar partida</button>
+  </main>
+
+  <script>
+    const stages = [
+      {
+        tag: "Transmisión 01 · Identificación",
+        title: "Agente Naza",
+        body: `<p class="brief">Recibiste una carta. Nada de lo que contiene está puesto porque sí.</p><div class="clue">La primera bandera está escondida en el papel.<br>Formato: <strong>NAZA{______}</strong></div><p>Ingresala para confirmar tu identidad.</p>`,
+        hash: "d42799475764bab5da4d20517984fe8e56d4892a083143ffdabd4ddd943e3cf0",
+        placeholder: "NAZA{______}",
+        success: "IDENTIDAD CONFIRMADA",
+        unlockAt: "2026-09-24T08:00:00-03:00",
+        lockMessage: "La segunda transmisión llegará el 24 de setiembre a las 08:00."
+      },
+      {
+        tag: "Transmisión 02 · Preparativos",
+        title: "Cambio de planes",
+        body: `<p class="brief">La misión comienza el 25 y termina el 27. No cruzamos ninguna frontera, pero tampoco volvemos a dormir a casa.</p><div class="icons" aria-label="Dos, luna, cama, valija y desayuno"><span>2</span><span>🌙</span><span>🛏️</span><span>🧳</span><span>☕</span></div><div class="clue">Tiene una cama que no hay que tender y la mañana empieza con desayuno. ¿Qué clase de lugar nos espera?</div>`,
+        hash: "ab5470ec3214b1f3afbd1594a3606cfd84ea69af33f0a347df7959ec3ad8f962",
+        placeholder: "NAZA{______}",
+        success: "EQUIPAJE AUTORIZADO",
+        unlockAt: "2026-09-25T08:00:00-03:00",
+        lockMessage: "Misión parcial revelada: escapada de dos noches. Prepará cédula, ropa cómoda, algo lindo para salir y traje de baño. La ubicación llega el viernes a las 08:00."
+      },
+      {
+        tag: "Transmisión 03 · Punto de encuentro",
+        title: "Encontrá la ubicación",
+        body: `<p class="brief">Tres fragmentos forman una dirección. Unilos y buscá dónde terminan.</p><div class="address"><span>21</span><span>El mes que también da nombre a una avenida</span><span>2752</span></div><div class="clue">Cuando encuentres el lugar, su nombre será la bandera.</div>`,
+        hash: "29365928bda83aa3647c781cdee64bff069a94a60cae4c456c5f194f2bc71e48",
+        placeholder: "NAZA{________}",
+        success: "DESTINO LOCALIZADO"
+      },
+      {
+        tag: "Transmisión final · Habitación",
+        title: "Falta una bandera",
+        body: `<p class="brief">Llegaste al punto de partida, pero todavía no descubriste el destino.</p><div class="clue">La última bandera no está en internet. Te espera donde vas a dormir.</div><p>Cuando la encuentres, ingresala para abrir el expediente final.</p>`,
+        hash: "706468ea0349cc2de5f8148cd4099c02db731eefb8e0455966af9239b67a8b2c",
+        placeholder: "NAZA{_________}",
+        success: "EXPEDIENTE DESBLOQUEADO"
+      }
+    ];
+
+    const storageKey = "expediente26-progress-v1";
+    const game = document.querySelector("#game");
+    const status = document.querySelector("#status");
+    const progressBar = document.querySelector("#progress");
+    let progress = loadProgress();
+    let timer;
+
+    function loadProgress() {
+      try { return Math.min(Number(localStorage.getItem(storageKey)) || 0, stages.length); }
+      catch { return 0; }
+    }
+
+    function saveProgress() {
+      try { localStorage.setItem(storageKey, String(progress)); }
+      catch { /* La partida continúa; algunos navegadores privados bloquean el guardado. */ }
+    }
+
+    function normalize(value) {
+      return value.trim().toUpperCase().normalize("NFD").replace(/[\u0300-\u036f]/g, "").replace(/^NAZA\{(.+)\}$/, "$1").replace(/[^A-Z0-9]/g, "");
+    }
+
+    async function digest(value) {
+      const bytes = new TextEncoder().encode(normalize(value));
+      const hash = await crypto.subtle.digest("SHA-256", bytes);
+      return [...new Uint8Array(hash)].map(byte => byte.toString(16).padStart(2,"0")).join("");
+    }
+
+    function render() {
+      clearInterval(timer);
+      progressBar.style.width = `${progress / stages.length * 100}%`;
+      status.textContent = progress === stages.length ? "Misión cumplida" : `Bandera ${progress + 1}/${stages.length}`;
+
+      if (progress === stages.length) return renderFinal();
+      const stage = stages[progress];
+      const lockedUntil = progress > 0 && stages[progress - 1].unlockAt;
+      if (lockedUntil && Date.now() < Date.parse(lockedUntil)) return renderLock(stages[progress - 1]);
+
+      game.innerHTML = `<div class="tag">${stage.tag}</div><h1>${stage.title}</h1>${stage.body}<form id="answer-form"><label for="answer">Bandera de acceso</label><div class="answer"><input id="answer" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${stage.placeholder}" required><button>VALIDAR</button></div><p class="feedback" id="feedback"></p></form><p class="saved">▣ El progreso se guarda automáticamente en este dispositivo.</p>`;
+      document.querySelector("#answer-form").addEventListener("submit", submitAnswer);
+      document.querySelector("#answer").focus();
+    }
+
+    async function submitAnswer(event) {
+      event.preventDefault();
+      const input = document.querySelector("#answer");
+      const feedback = document.querySelector("#feedback");
+      const button = event.currentTarget.querySelector("button");
+      button.disabled = true;
+      const valid = await digest(input.value) === stages[progress].hash;
+      button.disabled = false;
+      if (!valid) {
+        feedback.textContent = "ACCESO DENEGADO · Revisá la pista e intentá otra vez.";
+        input.select();
+        return;
+      }
+      const message = stages[progress].success;
+      progress++;
+      saveProgress();
+      game.classList.add("flash");
+      game.innerHTML = `<div class="tag">Bandera válida</div><h2>${message}</h2><p>Descifrando la siguiente transmisión…</p>`;
+      setTimeout(() => { game.classList.remove("flash"); render(); }, 1300);
+    }
+
+    function renderLock(previous) {
+      const update = () => {
+        const remaining = Date.parse(previous.unlockAt) - Date.now();
+        if (remaining <= 0) return render();
+        const hours = Math.floor(remaining / 3600000);
+        const minutes = Math.floor(remaining % 3600000 / 60000);
+        const seconds = Math.floor(remaining % 60000 / 1000);
+        document.querySelector("#countdown").textContent = [hours,minutes,seconds].map(n => String(n).padStart(2,"0")).join(":");
+      };
+      game.innerHTML = `<div class="lock"><div class="tag">Acceso temporal bloqueado</div><h2>Transmisión interceptada</h2><p>${previous.lockMessage}</p><div class="countdown" id="countdown">--:--:--</div><p class="saved">Podés cerrar esta página. Tu avance ya quedó guardado.</p></div>`;
+      update();
+      timer = setInterval(update, 1000);
+    }
+
+    function renderFinal() {
+      game.innerHTML = `<div class="final"><div class="tag">Misión cumplida · 26/09/2026</div><span class="plane" role="img" aria-label="Avión">✈️</span><h1>Nos vamos a volar</h1><p>Dicen que el tiempo vuela cuando uno está con la persona indicada.</p><div class="manifest"><strong>AGENCIA:</strong> TIME FLIES<br><strong>MISIÓN:</strong> SOBREVOLAR MONTEVIDEO<br><strong>TRIPULACIÓN:</strong> NAZA + NICO<br><strong>FECHA:</strong> 26 DE SETIEMBRE</div><p>Esta vez, nosotros también. ❤️</p></div>`;
+    }
+
+    document.querySelector("#reset").addEventListener("click", () => {
+      if (!confirm("¿Reiniciar todo el progreso de la misión?")) return;
+      progress = 0;
+      saveProgress();
+      render();
+    });
+
+    console.assert(normalize(" Naza{time flies} ") === "TIMEFLIES");
+    console.assert(stages.length === 4);
+    render();
+  </script>
+</body>
+</html>
