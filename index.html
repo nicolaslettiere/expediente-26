@@ -98,7 +98,8 @@
       }
     ];
 
-    const storageKey = "expediente26-progress-v1";
+    const previewMode = new URLSearchParams(location.search).get("preview") === "1";
+    const storageKey = `expediente26-progress-v1${previewMode ? "-preview" : ""}`;
     const game = document.querySelector("#game");
     const status = document.querySelector("#status");
     const progressBar = document.querySelector("#progress");
@@ -128,14 +129,14 @@
     function render() {
       clearInterval(timer);
       progressBar.style.width = `${progress / stages.length * 100}%`;
-      status.textContent = progress === stages.length ? "Misión cumplida" : `Bandera ${progress + 1}/${stages.length}`;
+      status.textContent = previewMode ? "Vista previa" : progress === stages.length ? "Misión cumplida" : `Bandera ${progress + 1}/${stages.length}`;
 
       if (progress === stages.length) return renderFinal();
       const stage = stages[progress];
       const lockedUntil = progress > 0 && stages[progress - 1].unlockAt;
-      if (lockedUntil && Date.now() < Date.parse(lockedUntil)) return renderLock(stages[progress - 1]);
+      if (!previewMode && lockedUntil && Date.now() < Date.parse(lockedUntil)) return renderLock(stages[progress - 1]);
 
-      game.innerHTML = `<div class="tag">${stage.tag}</div><h1>${stage.title}</h1>${stage.body}<form id="answer-form"><label for="answer">Bandera de acceso</label><div class="answer"><input id="answer" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${stage.placeholder}" required><button>VALIDAR</button></div><p class="feedback" id="feedback"></p></form><p class="saved">▣ El progreso se guarda automáticamente en este dispositivo.</p>`;
+      game.innerHTML = `<div class="tag">${previewMode ? "MODO VISTA PREVIA · " : ""}${stage.tag}</div><h1>${stage.title}</h1>${stage.body}<form id="answer-form"><label for="answer">Bandera de acceso</label><div class="answer"><input id="answer" autocomplete="off" autocapitalize="characters" spellcheck="false" placeholder="${stage.placeholder}" required><button>VALIDAR</button></div><p class="feedback" id="feedback"></p></form><p class="saved">▣ El progreso ${previewMode ? "de prueba " : ""}se guarda automáticamente en este dispositivo.</p>`;
       document.querySelector("#answer-form").addEventListener("submit", submitAnswer);
       document.querySelector("#answer").focus();
     }
